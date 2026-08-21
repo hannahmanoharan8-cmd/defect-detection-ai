@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Defect Detection AI | Quality Inspection</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #08111f;
+      --card: #101c2e;
+      --text: #eef5ff;
+      --muted: #91a4bd;
+      --accent: #38bdf8;
+      --green: #22c55e;
+      --red: #ef4444;
+      --border: rgba(255,255,255,.09);
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top right, #12345b, var(--bg) 38%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(1180px, 92%);
+      margin: auto;
+    }
+
+    header {
+      padding: 22px 0;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(8,17,31,.9);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg,#38bdf8,#2563eb);
+      font-size: 22px;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 11px;
+      padding: 12px 17px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .nav-btn {
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--card);
+    }
+
+    .primary {
+      background: linear-gradient(135deg,#38bdf8,#2563eb);
+      color: white;
+    }
+
+    .secondary {
+      background: #1b304b;
+      color: #dbeafe;
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .hero {
+      padding: 70px 0 35px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(56,189,248,.12);
+      color: #7dd3fc;
+      border: 1px solid rgba(56,189,248,.25);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(38px,6vw,68px);
+      line-height: 1;
+    }
+
+    .hero p {
+      max-width: 680px;
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 22px;
+      padding: 25px 0 70px;
+    }
+
+    .card {
+      background: linear-gradient(145deg,rgba(20,36,58,.96),rgba(12,24,40,.96));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+    }
+
+    .card h2 {
+      margin-bottom: 6px;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .upload {
+      min-height: 360px;
+      border: 2px dashed #38516f;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 25px;
+      overflow: hidden;
+    }
+
+    .upload-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .camera {
+      font-size: 50px;
+    }
+
+    .upload span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    input[type=file] {
+      display: none;
+    }
+
+    .upload img {
+      max-width: 100%;
+      max-height: 320px;
+      border-radius: 12px;
+      display: none;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .result {
+      min-height: 360px;
+    }
+
+    .status {
+      border-radius: 16px;
+      padding: 25px;
+      text-align: center;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.025);
+    }
+
+    .status-icon {
+      font-size: 55px;
+      margin-bottom: 8px;
+    }
+
+    .status h3 {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    .good {
+      color: var(--green);
+    }
+
+    .bad {
+      color: var(--red);
+    }
+
+    .status p {
+      color: var(--muted);
+    }
+
+    .confidence {
+      margin-top: 20px;
+    }
+
+    .confidence-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 7px;
+    }
+
+    .bar {
+      height: 9px;
+      background: #20334a;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0;
+      transition: width .8s;
+    }
+
+    .details {
+      margin-top: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .detail span {
+      color: var(--muted);
+    }
+
+    .stats {
+      grid-column: 1/-1;
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 15px;
+    }
+
+    .stat {
+      padding: 20px;
+      border-radius: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .stat .number {
+      font-size: 34px;
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .stat p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .features {
+      padding: 10px 0 70px;
+    }
+
+    .features h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 30px;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 15px;
+    }
+
+    .feature {
+      padding: 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .feature .emoji {
+      font-size: 30px;
+    }
+
+    .feature h3 {
+      margin: 12px 0 7px;
+    }
+
+    .feature p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 25px 0;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 35px;
+      height: 35px;
+      border: 4px solid #29425e;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media(max-width:850px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media(max-width:560px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding-top: 45px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="container">
+    <nav>
+
+      <div class="brand">
+        <div class="logo">🧠</div>
+
+        <div>
+          Defect Detection AI
+          <small>AI-Powered Quality Inspection</small>
+        </div>
+      </div>
+
+      <button class="nav-btn" onclick="resetApp()">
+        ↻ Reset
+      </button>
+
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section class="hero container">
+
+  <div class="badge">
+    🏭 SMART MANUFACTURING
+  </div>
+
+  <h1>
+    Visual AI for reliable<br>
+    manufacturing quality
+  </h1>
+
+  <p>
+    Detect defects. Highlight problems. Improve quality.
+    Upload a product image and run an AI-style quality inspection.
+  </p>
+
+</section>
+
+
+<section class="dashboard container">
+
+  <!-- IMAGE UPLOAD -->
+
+  <div class="card">
+
+    <h2>📷 Product Inspection</h2>
+
+    <p class="sub">
+      Capture or upload a product image
+    </p>
+
+    <div class="upload" id="dropZone">
+
+      <div class="upload-content" id="uploadContent">
+
+        <div class="camera">
+          📦
+        </div>
+
+        <strong>
+          Drop product image here
+        </strong>
+
+        <span>
+          or click below to choose an image
+        </span>
+
+        <label
+          class="primary"
+          style="padding:12px 17px;border-radius:11px;cursor:pointer;"
+        >
+
+          Choose Image
+
+          <input
+            type="file"
+            id="fileInput"
+            accept="image/*"
+          >
+
+        </label>
+
+      </div>
+
+      <img
+        id="preview"
+        alt="Product preview"
+      >
+
+    </div>
+
+
+    <div class="actions">
+
+      <button
+        class="primary"
+        id="analyzeBtn"
+        disabled
+        onclick="analyzeImage()"
+      >
+        🔍 Analyze with AI
+      </button>
+
+      <button
+        class="secondary"
+        onclick="document.getElementById('fileInput').click()"
+      >
+        📁 Upload
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- AI RESULT -->
+
+  <div class="card result">
+
+    <h2>🧠 AI Analysis</h2>
+
+    <p class="sub">
+      Inspection result will appear here
+    </p>
+
+
+    <div
+      class="loading"
+      id="loading"
+    >
+
+      <div class="spinner"></div>
+
+      AI vision model is analyzing the image...
+
+    </div>
+
+
+    <div
+      class="status"
+      id="initial"
+    >
+
+      <div class="status-icon">
+        🔬
+      </div>
+
+      <h3>
+        Ready to inspect
+      </h3>
+
+      <p>
+        Upload a product image to start the inspection.
+      </p>
+
+    </div>
+
+
+    <div
+      id="resultBox"
+      style="display:none;"
+    >
+
+      <div
+        class="status"
+        id="statusBox"
+      >
+
+        <div
+          class="status-icon"
+          id="statusIcon"
+        ></div>
+
+        <h3
+          id="statusTitle"
+        ></h3>
+
+        <p
+          id="statusText"
+        ></p>
+
+      </div>
+
+
+      <div class="confidence">
+
+        <div class="confidence-row">
+
+          <span>
+            AI Confidence
+          </span>
+
+          <strong id="confidenceText">
+            0%
+          </strong>
+
+        </div>
+
+        <div class="bar">
+
+          <div
+            class="fill"
+            id="confidenceBar"
+          ></div>
+
+        </div>
+
+      </div>
+
+
+      <div class="details">
+
+        <div class="detail">
+          <span>Defect Type</span>
+          <strong id="defectType">—</strong>
+        </div>
+
+        <div class="detail">
+          <span>Inspection</span>
+          <strong id="inspectionId">—</strong>
+        </div>
+
+        <div class="detail">
+          <span>Decision</span>
+          <strong id="decision">—</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- STATISTICS -->
+
+  <div class="stats">
+
+    <div class="stat">
+
+      <p>
+        TOTAL INSPECTED
+      </p>
+
+      <div
+        class="number"
+        id="totalCount"
+      >
+        0
+      </div>
+
+    </div>
+
+
+    <div class="stat">
+
+      <p>
+        GOOD PRODUCTS
+      </p>
+
+      <div
+        class="number good"
+        id="goodCount"
+      >
+        0
+      </div>
+
+    </div>
+
+
+    <div class="stat">
+
+      <p>
+        DEFECTIVE PRODUCTS
+      </p>
+
+      <div
+        class="number bad"
+        id="defectCount"
+      >
+        0
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- FEATURES -->
+
+<section class="features container">
+
+  <h2>
+    How It Works
+  </h2>
+
+
+  <div class="feature-grid">
+
+    <div class="feature">
+
+      <div class="emoji">
+        📷
+      </div>
+
+      <h3>
+        Capture
+      </h3>
+
+      <p>
+        Upload or capture an image of the product for inspection.
+      </p>
+
+    </div>
+
+
+    <div class="feature">
+
+      <div class="emoji">
+        🧠
+      </div>
+
+      <h3>
+        AI Analysis
+      </h3>
+
+      <p>
+        A vision model analyzes the product image for quality issues.
+      </p>
+
+    </div>
+
+
+    <div class="feature">
+
+      <div class="emoji">
+        ✅
+      </div>
+
+      <h3>
+        Decision
+      </h3>
+
+      <p>
+        Classify the product as GOOD or DEFECTIVE and identify the issue.
+      </p>
+
+    </div>
+
+
+    <div class="feature">
+
+      <div class="emoji">
+        📊
+      </div>
+
+      <h3>
+        Count
+      </h3>
+
+      <p>
+        Automatically update inspection statistics for quality analytics.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<footer>
+
+  Defect Detection AI • Hackathon Prototype •
+  Smarter, scalable and affordable quality control
+
+</footer>
+
+
+<script>
+
+let selectedFile = null;
+
+let total = 0;
+let good = 0;
+let defective = 0;
+
+
+const fileInput =
+  document.getElementById("fileInput");
+
+const dropZone =
+  document.getElementById("dropZone");
+
+const preview =
+  document.getElementById("preview");
+
+const uploadContent =
+  document.getElementById("uploadContent");
+
+const analyzeBtn =
+  document.getElementById("analyzeBtn");
+
+
+/* FILE SELECTION */
+
+fileInput.addEventListener(
+  "change",
+  function(e) {
+
+    if (e.target.files.length) {
+
+      loadImage(e.target.files[0]);
+
+    }
+
+  }
+);
+
+
+/* DRAG AND DROP */
+
+["dragenter", "dragover"].forEach(
+  function(event) {
+
+    dropZone.addEventListener(
+      event,
+      function(e) {
+
+        e.preventDefault();
+
+        dropZone.style.borderColor =
+          "#38bdf8";
+
+      }
+    );
+
+  }
+);
+
+
+["dragleave", "drop"].forEach(
+  function(event) {
+
+    dropZone.addEventListener(
+      event,
+      function(e) {
+
+        e.preventDefault();
+
+        dropZone.style.borderColor =
+          "#38516f";
+
+      }
+    );
+
+  }
+);
+
+
+dropZone.addEventListener(
+  "drop",
+  function(e) {
+
+    if (e.dataTransfer.files.length) {
+
+      loadImage(
+        e.dataTransfer.files[0]
+      );
+
+    }
+
+  }
+);
+
+
+/* LOAD IMAGE */
+
+function loadImage(file) {
+
+  if (!file.type.startsWith("image/")) {
+
+    alert(
+      "Please choose an image file."
+    );
+
+    return;
+
+  }
+
+
+  selectedFile = file;
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload = function(e) {
+
+    preview.src =
+      e.target.result;
+
+    preview.style.display =
+      "block";
+
+    uploadContent.style.display =
+      "none";
+
+    analyzeBtn.disabled =
+      false;
+
+    document.getElementById(
+      "initial"
+    ).style.display = "block";
+
+    document.getElementById(
+      "resultBox"
+    ).style.display = "none";
+
+  };
+
+
+  reader.readAsDataURL(file);
+
+}
+
+
+/* AI ANALYSIS */
+
+function analyzeImage() {
+
+  if (!selectedFile)
+    return;
+
+
+  document.getElementById(
+    "initial"
+  ).style.display = "none";
+
+
+  document.getElementById(
+    "resultBox"
+  ).style.display = "none";
+
+
+  document.getElementById(
+    "loading"
+  ).style.display = "block";
+
+
+  analyzeBtn.disabled = true;
+
+
+  /*
+    DEMO AI SIMULATION
+
+    This randomly generates a result.
+    Later you can connect this to
+    a real machine-learning model/API.
+  */
+
+  setTimeout(function() {
+
+    const isDefective =
+      Math.random() < 0.55;
+
+
+    const defects = [
+      "Crack",
+      "Cap Damage",
+      "Label Error"
+    ];
+
+
+    const defect =
+      isDefective
+        ? defects[
+            Math.floor(
+              Math.random() *
+              defects.length
+            )
+          ]
+        : "None";
+
+
+    const confidence =
+      isDefective
+        ? Math.floor(
+            88 + Math.random() * 10
+          )
+        : Math.floor(
+            91 + Math.random() * 8
+          );
+
+
+    total++;
+
+
+    if (isDefective) {
+
+      defective++;
+
+    } else {
+
+      good++;
+
+    }
+
+
+    updateStats();
+
+
+    document.getElementById(
+      "loading"
+    ).style.display = "none";
+
+
+    document.getElementById(
+      "resultBox"
+    ).style.display = "block";
+
+
+    const statusBox =
+      document.getElementById(
+        "statusBox"
+      );
+
+
+    const statusIcon =
+      document.getElementById(
+        "statusIcon"
+      );
+
+
+    const statusTitle =
+      document.getElementById(
+        "statusTitle"
+      );
+
+
+    const statusText =
+      document.getElementById(
+        "statusText"
+      );
+
+
+    const confidenceBar =
+      document.getElementById(
+        "confidenceBar"
+      );
+
+
+    if (isDefective) {
+
+      statusBox.style.borderColor =
+        "rgba(239,68,68,.35)";
+
+      statusIcon.textContent =
+        "❌";
+
+      statusTitle.textContent =
+        "DEFECTIVE";
+
+      statusTitle.className =
+        "bad";
+
+      statusText.textContent =
+        "A potential product defect has been detected.";
+
+      confidenceBar.style.background =
+        "var(--red)";
+
+    } else {
+
+      statusBox.style.borderColor =
+        "rgba(34,197,94,.35)";
+
+      statusIcon.textContent =
+        "✅";
+
+      statusTitle.textContent =
+        "GOOD";
+
+      statusTitle.className =
+        "good";
+
+      statusText.textContent =
+        "No visible defect detected in this inspection.";
+
+      confidenceBar.style.background =
+        "var(--green)";
+
+    }
+
+
+    document.getElementById(
+      "confidenceText"
+    ).textContent =
+      confidence + "%";
+
+
+    document.getElementById(
+      "confidenceBar"
+    ).style.width =
+      confidence + "%";
+
+
+    document.getElementById(
+      "defectType"
+    ).textContent =
+      defect;
+
+
+    document.getElementById(
+      "inspectionId"
+    ).textContent =
+      "INS-" +
+      String(total).padStart(
+        4,
+        "0"
+      );
+
+
+    document.getElementById(
+      "decision"
+    ).textContent =
+      isDefective
+        ? "Reject / Review"
+        : "Pass";
+
+
+    analyzeBtn.disabled =
+      false;
+
+  }, 1800);
+
+}
+
+
+/* UPDATE STATISTICS */
+
+function updateStats() {
+
+  document.getElementById(
+    "totalCount"
+  ).textContent =
+    total;
+
+
+  document.getElementById(
+    "goodCount"
+  ).textContent =
+    good;
+
+
+  document.getElementById(
+    "defectCount"
+  ).textContent =
+    defective;
+
+}
+
+
+/* RESET */
+
+function resetApp() {
+
+  selectedFile = null;
+
+  total = 0;
+  good = 0;
+  defective = 0;
+
+
+  fileInput.value = "";
+
+
+  preview.src = "";
+
+  preview.style.display =
+    "none";
+
+
+  uploadContent.style.display =
+    "flex";
+
+
+  analyzeBtn.disabled =
+    true;
+
+
+  document.getElementById(
+    "loading"
+  ).style.display =
+    "none";
+
+
+  document.getElementById(
+    "resultBox"
+  ).style.display =
+    "none";
+
+
+  document.getElementById(
+    "initial"
+  ).style.display =
+    "block";
+
+
+  updateStats();
+
+}
+
+</script>
+
+</body>
+</html>
